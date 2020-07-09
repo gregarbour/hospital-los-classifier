@@ -1,0 +1,71 @@
+---
+title: "Exploratory Plots"
+author: "Greg Arbour"
+date: '2019-10-23'
+output: html_document
+---
+
+```{r, include=T, echo = F, message=F}
+library(ggplot2)
+library(corrplot)
+library(dplyr)
+setwd("~/Desktop/Data Science/Project/Data Files/")
+load('train_phase1.R')
+
+for(i in c('admit_type_desc','admit_source_desc', 'age', 'medical_specialty_grouped')){
+  plot <- ggplot(train, aes(x = time_in_hospital)) +
+    geom_density() +
+    facet_wrap(as.formula(paste("~", i)))
+  print(plot)
+  
+  plot2 <- ggplot(train, aes(x = time_in_hospital)) +
+    geom_freqpoly(aes_string(color = i, y = '..density..'), binwidth = 1)
+  print(plot2)
+  table <- prop.table(table(train[[i]])) 
+  print(paste0(round(table*100,2),"%"))
+  
+}
+
+for(i in c('number_outpatient', 'number_emergency', 'number_inpatient', 'number_diagnoses')){
+plot <- ggplot(train, aes_string(y = 'time_in_hospital', x = i)) +
+  geom_smooth(method = 'glm') +
+  geom_jitter(alpha = 0.3)
+print(plot)
+}
+
+
+for(i in c(3:4, 15:43, 94)){ #Double check that the indices are correct. You made some changes to the variables, and added
+  # a the multiple_enc variable
+  temp_df <- data.frame(time_in_hospital = train$time_in_hospital,
+                      var = as.factor(train[[i]]))
+var_name <- tools::toTitleCase(gsub(names(train)[i], pattern = "_", replacement = " "))
+plot <- ggplot(temp_df, aes(x=time_in_hospital, fill = var)) +
+  geom_histogram(aes(y=..ncount../sum(..ncount..)),
+                 binwidth = 1, position = 'identity', alpha = 0.5) +
+  scale_fill_discrete(var_name) + xlab("Time in Hospital") + ylab("% of Total")
+
+  print(plot)
+  print(table(temp_df$var))
+}
+
+
+
+
+for(i in c(46:93)){
+  temp_df <- data.frame(time_in_hospital = train$time_in_hospital,
+                        var = as.factor(train[[i]]))
+  var_name <- tools::toTitleCase(gsub(names(train)[i], pattern = "_", replacement = " "))
+  count = c(paste0("0      Count: ", formatC(sum(temp_df$var == 0), big.mark = ",")),
+            paste0("1      Count: ", formatC(sum(temp_df$var == 1), big.mark = ",")))
+
+
+
+plot <- ggplot(temp_df, aes(x=time_in_hospital, fill = var)) +
+              geom_histogram(aes(y=..ncount../sum(..ncount..)),
+                   binwidth = 1, position = 'identity', alpha = 0.5) +
+      scale_fill_discrete(name = var_name, labels = count) +
+      xlab("Time in Hospital")
+  print(plot)
+}
+
+```

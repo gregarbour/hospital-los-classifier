@@ -1,0 +1,20 @@
+---
+title: "Table 1"
+author: "Greg Arbour"
+date: '2019-10-31'
+output: html_document
+---
+
+
+```{r, include=T, echo = F, message=F, warning=FALSE}
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+setwd("~/Desktop/Data Science/Project/Data Files/")
+load('table1.R')
+table1 %>% 
+  kable() %>%
+  kable_styling()
+```
+
